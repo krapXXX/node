@@ -62,7 +62,7 @@ function parseUrl(url) {
 if(parts.length==2)
 {
     parts = parts[0].split('/');
-
+ 
         let host = parts[0];
         result.path=[
             parts[1],
