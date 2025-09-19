@@ -1,92 +1,99 @@
-const _url = "https://login:passw0rd@music.portal.fun:80/rock/ballads?search=scorpions&from=1990#descending";
-const invalid_url = "123";
-let result = {
-    "scheme": "https",
-    "auth": {
-        "user-id": "login",
-        "password": "passw0rd",
-    },
-    "host": {
-        "tld": "fun",
-        "domain": "portal",
-        "sybdomain": "music"
-    },
-    "port": 80,
-    "path": [
-        "rock",
-        "ballads"
-    ],
-    "query": {
-        "search": "scorpions",
-        "from": "1990"
-    },
-    "fragment": "descending"
-}
+import http from "http"
+import * as fs from "node:fs/promises"
 
-function parseUrl(url) {
-    let result = {};
-    let parts = url.split("://");
-    if (parts.length != 2) {
-        throw new Error(`Format Error:scheme not detected in ${url}`);
+const HTTP_PORT = 81;
+
+async function serverFunction(request, response) {
+    //console.log(request)
+    const pageData = {
+        method: request.method, 
+        httpVersion: request.httpVersion, 
+        url: request.url,
+        query: null,
+        controller: "home",
+        action: "index",
+        slug: null
+    }
+
+    response.writeHead(200, {
+        'Content-Type': 'text/html'
+    })
+
+    let parts = request.url.split("?")
+    if (parts.length > 2) {
+        response.writeHead(400)
+        response.end("Bad request")
     }
     if (parts.length == 2) {
-        result.scheme = parts[0];
-    }
 
-    parts = parts[1].split("@");
-    if (parts.length != 2) {
-        throw new Error(`Format Error:auth not detected in ${url}`);
-    }
-    if (parts.length == 2) {
-        let credentials = parts[0];
-        credentials = credentials.split(":");
-        if (credentials.length == 2) {
-            result.auth = {
-                "user-id" : credentials[0],
-                "pass": credentials[1]
+        pageData.query = parts[1]
+        let tempString = '<pre>{\n'
+
+        let queryEntry = parts[1].split('&')
+        for (let entryIndex in queryEntry) {
+            let entrySplit = queryEntry[entryIndex].split('=')
+            if (entrySplit.length != 2) {
+                throw `Format Error: invalid query entry`
             }
+            tempString += `    ${entrySplit[0]}: ${entrySplit[1]}${entryIndex == queryEntry.length - 1 ? '' : ','}\n`
         }
+        tempString += '}</pre>'
+        pageData.query = tempString
     }
- q=parts[1].split('#')
-    if(q.length==2)
-    {   
-        let query = q[0];
-        result.fragment=q[1];
-        query =query.split('&');
-        result.query={
-            "search":query[0].split('=')[1],
-            "from":query[1].split('=')[1]
-        };   
+    pageData.path = parts[0]
+
+
+    parts = parts[0].split('/')
+    let path = parts.slice(1)
+    if (path.length > 0) {
+        pageData.controller = path[0]
     }
-    parts=parts[1].split('?')
-if(parts.length==2)
-{
-    parts = parts[0].split('/');
- 
-        let host = parts[0];
-        result.path=[
-            parts[1],
-            parts[2]
-        ]
-        if(host.includes(':'))
-        {
-            let hp = host.split(':');
-            host = hp[0];
-            result.port=hp[1];
+    path = path.slice(1)
+    if (path.length > 0) {
+        pageData.action = path[0]
+    }
+    path = path.slice(1)
+    if (path.length > 0) {
+        let slug = ''
+        for (let entry of path) {
+            slug += `/${entry}`
         }
-        host = host.split(".");
+        pageData.slug = slug
+    }
 
-            result.host = {
-                "tld":host[2],
-                "domain" :host[1],
-                "sybdomain": host[0]
-            }
-          
-        }
+    const file = await fs.open("home.html", "r")
+    let html = (await file.readFile()).toString()
+    file.close()
+    for (let k in pageData) {
+        html = html.replaceAll(`{{${k}}}`, pageData[k])
+    }
 
- 
-    result.rest = parts[3];
-
-    return result;
+    response.end(html)
 }
-console.log(parseUrl(_url));
+
+const server = http.createServer(serverFunction)
+server.on('close', () => {
+    console.log('Server stopped')
+    process.exit()
+})
+
+
+server.listen(HTTP_PORT, () => {
+    console.log('Server listening port', HTTP_PORT)
+    console.log('Press Ctrl-C to stop')
+})
+
+process.on('SIGINT', () => {
+    server.close()
+})
+
+// header line and body separator: /r/n
+// HTTP Request:
+// 9 Standart Methods: 
+// GET - get, 
+// POST - create, 
+// PUT - replace, PATCH - update, 
+// DELETE, 
+// HEAD, TRACE, CONNECT, 
+// OPTIONS
+// no body allowed for GET and HEAD

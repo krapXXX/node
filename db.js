@@ -24,4 +24,4 @@ console.log(fieldslist);
 })
 
 .catch(console.error);
-dbPool.end())
+dbPool.end();

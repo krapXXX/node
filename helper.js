@@ -7,4 +7,36 @@ function delay(timeout, isOk = true) {
     })
 }
 
-export {delay, time}
+/**
+ * Повертає MIME тип за іменем файла, або null, якщо
+ * розширення файла не належить дозволеному переліку
+ * @param {*} path ім'я файлу або шлях до нього
+ */
+function getAllowedContentType(path) {
+ let dotIndex = path.lastIndexOf('.')
+        if (dotIndex ==-1) {
+            return null;
+        }
+
+            const ext = path.substring(dotIndex+1);
+            console.log(ext);
+            let contentType = null;
+            switch (ext) {
+                case'html':
+                case 'css':contentType = `text/${ext},; charset=utf-8`; break;
+                case 'js':contentType = "text/javascript;charset=utf-8"; break;
+                case 'txt':contentType = "text/plain;charset=utf-8"; break;
+                case 'bmp':
+                case 'gif':
+                case 'png':
+                case 'webp':contentType = "image/"+ext; break;
+                case 'jpg':
+                case 'jpeg':contentType = "image/jpeg"; break;
+                case 'pdf':contentType = "application/pdf"; break;
+
+            }
+            return contentType;
+}
+ 
+
+export {delay, time, getAllowedContentType};
