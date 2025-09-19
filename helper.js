@@ -21,20 +21,30 @@ function getAllowedContentType(path) {
             const ext = path.substring(dotIndex+1);
             console.log(ext);
             let contentType = null;
-            switch (ext) {
-                case'html':
-                case 'css':contentType = `text/${ext},; charset=utf-8`; break;
-                case 'js':contentType = "text/javascript;charset=utf-8"; break;
-                case 'txt':contentType = "text/plain;charset=utf-8"; break;
-                case 'bmp':
-                case 'gif':
-                case 'png':
-                case 'webp':contentType = "image/"+ext; break;
-                case 'jpg':
-                case 'jpeg':contentType = "image/jpeg"; break;
-                case 'pdf':contentType = "application/pdf"; break;
+          switch (ext) {
+  case 'html': contentType = "text/html; charset=utf-8"; break;
+  case 'css':  contentType = "text/css; charset=utf-8"; break;
+  case 'js':   contentType = "text/javascript; charset=utf-8"; break;
+  case 'txt':  contentType = "text/plain; charset=utf-8"; break;
 
-            }
+  case 'bmp':  contentType = "image/bmp"; break;
+  case 'gif':  contentType = "image/gif"; break;
+  case 'png':  contentType = "image/png"; break;
+  case 'webp': contentType = "image/webp"; break;
+  case 'jpg':
+  case 'jpeg': contentType = "image/jpeg"; break;
+
+  case 'pdf':  contentType = "application/pdf"; break;
+
+  // ✅ нові типи
+  case 'mp3':  contentType = "audio/mpeg"; break;
+  case 'ogg':  contentType = "audio/ogg"; break;
+  case 'wav':  contentType = "audio/wav"; break;
+
+  case 'mp4':  contentType = "video/mp4"; break;
+  case 'webm': contentType = "video/webm"; break;
+}
+
             return contentType;
 }
  
