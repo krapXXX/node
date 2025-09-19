@@ -56,24 +56,45 @@ async function serverFunction(request, response) {
         } catch (_){ }
     }}
 
-    let controller, action, id;
-    let components = path.split('/',4);
-    if (components[1].length>0)
-    {
-        controller = components[1].toLowerCase();
-    }
-    else{controller = "home"}
-    if (components.length>2 && components[2].length>0)
-    {
-        action = components[2].toLowerCase();
-    }
-    else{action = "index"}
-if(components.length>3)
-{
-    id = components[3].toLowerCase();
+   let controller, action, slug;
+
+// спочатку ділимо шлях
+let components = path.split('/'); // розділити по "/"
+
+// controller
+if (components.length > 1 && components[1].length > 0) {
+    controller = components[1].toLowerCase();
+} else {
+    controller = "home";
 }
-else{id = null;}
-console.log(controller,action,id);
+
+// action
+if (components.length > 2 && components[2].length > 0) {
+    action = components[2].toLowerCase();
+} else {
+    action = "index";
+}
+
+// slug
+if (components.length > 3 && components[3].length > 0) {
+    slug = components[3].toLowerCase();
+} else {
+    slug = null;
+}
+let queryObj = {};
+if (parts.length === 2 && parts[1].length > 0) {
+    let queryStr = parts[1];
+    let pairs = queryStr.split("&");
+    for (let p of pairs) {
+        let [key, val] = p.split("=");
+        if (key) queryObj[key] = val ?? null;
+    }
+}
+pageData.controller = controller;
+pageData.action = action;
+pageData.slug = slug;
+pageData.query = queryObj;
+pageData.path = parts[0];
 
     if (parts.length == 2) {
         pageData.query = parts[1];
