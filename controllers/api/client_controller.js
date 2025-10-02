@@ -5,87 +5,124 @@ function isJsonContentType(header) {
 }
 
 export default class ClientController {
-    doGet(request, response, id) {
+
+constructor() {
+  this.restResponse = {
+    status: {
+      code: 200,
+      phrase: "OK",
+      isSuccess: true,
+    },
+    meta: {
+      service: "Client API",
+      method: "",
+      serverTime: new Date().getTime(),
+      cache: 0,
+      dataType: "",
+    },
+    data: null
+  };
+}
+doOptions(request, response) {
+    response.writeHead(200, {
+        'Access-Control-Allow-Origin': "*",
+        'Access-Control-Allow-Methods': request.headers['access-control-request-method'],
+        'Access-Control-Allow-Headers': '*'
+    });
+    response.end();
+}
+doGet(request, response, id) {
+    response.writeHead(200, {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json'
+    });
+    this.restResponse.meta.method = request.method;
+    this.restResponse.meta.slug = id;
+    this.restResponse.meta.cache = 86400;
+    this.restResponse.meta.dataType = "string";
+    this.restResponse.data = "GET ClientController";
+  response.end(JSON.stringify(this.restResponse));
+}
+
+
+doPost(request, response, id) {
+  let body = "";
+  request.on('data', chunk => { body += chunk });
+  request.on('end', () => {
+    console.log("ClientController::doPost body: " + body);
+    console.log(request.headers['content-type']);
+
+    if (isJsonContentType(request.headers["content-type"])) {
+      try {
+        const data = JSON.parse(body);
+
+        
+
         response.writeHead(200, {
-            'Access-Control-Allow-Origin': '*',
-            'Content-Type': 'application/json'
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
         });
-        response.end(JSON.stringify({
-            "Controller": "ClientController",
-            "method": "GET",
-            "semantics": "Read"
-        }));
-    }
-
-
-    doPost(request, response, id) {
-        let body = "";
-        request.on('data', function (chunk) { body += chunk });
-        request.on('end', function () {
-            console.log("ClientController::doPost body: " + body);
-            console.log(request.headers['content-type']);
-            if (isJsonContentType(request.headers["content-type"])) {
-                try {
-                    const data = JSON.parse(body);
-                    response.writeHead(200, {
-                        "Content-Type": "application/json",
-                        "Access-Control-Allow-Origin": "*"
-                    });
-                    response.end(JSON.stringify({
-                        "Controller": "ClientController",
-                        "method": "POST",
-                        "semantics": "Create",
-                        "body": data
-                    }));
-                } catch (err) {
-                    response.writeHead(400);
-                    response.end("Invalid JSON");
-                }
-            } else {
-                response.writeHead(415);
-                response.end("Unsupported Media Type");
-            }
+        
+        this.restResponse.meta.method = request.method;
+        this.restResponse.meta.slug = id;
+        this.restResponse.meta.cache = 86400;
+        this.restResponse.meta.dataType = "json";
+        this.restResponse.data = JSON.stringify({
+          "Controller": "POST ClientController",
+          "body": data
         });
-    }
+        response.end(JSON.stringify(this.restResponse));
 
-    doOptions(request, response) {
-        response.writeHead(200, {
-            'Access-Control-Allow-Origin': "*",
-            'Access-Control-Allow-Methods': request.headers['access-control-request-method'],
-            'Access-Control-Allow-Headers': '*'
-        });
-        response.end();
+      } catch (err) {
+        response.writeHead(400);
+        response.end("Invalid JSON");
+      }
+    } else {
+      response.writeHead(415);
+      response.end("Unsupported Media Type");
     }
-    doPut(request, response, id) {
-        response.writeHead(200, {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
+  });
+}
 
-        });
-        response.end(JSON.stringify({
-            "Controller": "ClientController",
-            "method": "PUT",
-            "semantics": "Update"
-        }));
-    }
-    // doPatch(request,response, id){
-    //     response.writeHead(200,{
-    //         'Content-Type':'application/json'
-    //     });
-    //     response.end(JSON.stringify({
-    //         "Controller":"ClientController",
-    //         "method":"PATCH",
-    //     "semantics":"Update"}));
-    // }
-    // doDelete(request,response, id){
-    //     response.writeHead(200,{
-    //         'Content-Type':'application/json'
-    //     });
-    //     response.end(JSON.stringify({
-    //         "Controller":"ClientController",
-    //         "method":"DELETE",
-    //     "semantics":"Delete"}));
-    // }
+doPut(request, response, id) {
+    response.writeHead(200, {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+
+    });
+     this.restResponse.meta.method = request.method;
+    this.restResponse.meta.slug = id;
+    this.restResponse.meta.cache = 86400;
+    this.restResponse.meta.dataType = "string";
+    this.restResponse.data = "PUT ClientController";
+  response.end(JSON.stringify(this.restResponse));
+}
+doPatch(request, response, id) {
+    response.writeHead(200, {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+    });
+      this.restResponse.meta.method = request.method;
+    this.restResponse.meta.slug = id;
+    this.restResponse.meta.cache = 86400;
+    this.restResponse.meta.dataType = "string";
+    this.restResponse.data = "PATCH ClientController";
+  response.end(JSON.stringify(this.restResponse));
+}
+
+doDelete(request, response, id) {
+    response.writeHead(200, {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+    });
+      this.restResponse.meta.method = request.method;
+    this.restResponse.meta.slug = id;
+    this.restResponse.meta.cache = 86400;
+    this.restResponse.meta.dataType = "string";
+    this.restResponse.data = "DELETE ClientController";
+  response.end(JSON.stringify(this.restResponse));
+}
+
 }
 
 
