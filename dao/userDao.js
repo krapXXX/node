@@ -10,7 +10,7 @@ export default class UserDao {
 }
 
  kdf(password, salt) {
-    let t = hash(password + salt);
+    let t = this.hash(password + salt);
     for (let i = 0; i < 3; i += 1) {
         t = this.hash(t);
     }
@@ -56,6 +56,38 @@ const id = res[0].U;
 
         return "Registered";
     }
+
+    async getUserAccessByCredentials(login, password) {
+    const sql = "SELECT * FROM user_accesses WHERE login = ? LIMIT 1";
+    const [rows] = await this.dbPool.query(sql, [login]);
+    if (rows.length === 0) return null;
+
+    const ua = rows[0];
+    const hash = this.kdf(password, ua.salt);
+
+    if (hash !== ua.dk) return null;
+
+    return ua;
+}
+
+async getDbIdentity() {
+    const [res] = await this.dbPool.query("SELECT UUID() AS U");
+    return res[0].U;
+}
+
+async createTokenForUserAccess(userAccess) {
+    const id = await this.getDbIdentity();
+    const timestamp = new Date().getTime()/1000|0;
+    const exp = timestamp + 1e6;
+
+    const sql = `
+        INSERT INTO tokens (id, access_id, issued_at, expired_at)
+        VALUES (?, ?, FROM_UNIXTIME(?), FROM_UNIXTIME(?))
+    `;
+    await this.dbPool.query(sql, [id, userAccess.id, timestamp, exp]);
+
+    return { id, timestamp, exp };
+}
 
 
 
