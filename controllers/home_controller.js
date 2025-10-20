@@ -1,6 +1,9 @@
 import * as fs from "node:fs/promises";
 
 export default class HomeController {
+constructor(dbPool) {
+    this.dbPool = dbPool;
+}
 
     async index(request, response, id) {
         let parts = request.url.split("?");

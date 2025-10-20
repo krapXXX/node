@@ -2,7 +2,8 @@ import * as fs from "node:fs/promises"
 import GroupDao from './dao/groupDao.js';
 import mysql from 'mysql2'
 import http from "http"
-import { getAllowedContentType } from './helper.js'
+import { getAllowedContentType,getSignature, getToken } from './helper.js'
+
 const dbIniFilename = "db.ini";
 const HTTP_PORT = 81;
 const CONTROLLERS_PATH = './controllers/'
@@ -99,11 +100,18 @@ async function serverFunction(request, response) {
     } else {
         id = null;
     }
-    console.log(controller, action, id);
+   // console.log(controller, action, id);
+
+    const services ={
+       getAllowedContentType,
+        dbPool, 
+        getSignature, 
+        getToken
+    }
     if (controller == 'api') {
         if (typeof apiControllers[action] == 'function') {
-            const apiControllerObject = new apiControllers[action];
-            apiControllerObject.dbPool = dbPool;
+            const apiControllerObject = new apiControllers[action](services);
+          //  apiControllerObject.dbPool = dbPool;
             const apiAction = "do" + request.method.charAt(0).toUpperCase() + request.method.slice(1).toLowerCase();
             if (typeof apiControllerObject[apiAction] == 'function') {
                 apiControllerObject[apiAction](request, response, id);
